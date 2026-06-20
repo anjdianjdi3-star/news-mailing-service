@@ -2,9 +2,9 @@ name: Custom News Mailer Cron Trigger
 
 on:
   schedule:
-    # Run every 10 minutes
+    # Run every 10 minutes (off-peak to avoid congestion)
     # Note: GitHub Actions schedule triggers can be delayed, but the backend handles this gracefully
-    - cron: '*/10 * * * *'
+    - cron: '3,13,23,33,43,53 * * * *'
   # Allow manual trigger from the GitHub Actions tab
   workflow_dispatch:
 

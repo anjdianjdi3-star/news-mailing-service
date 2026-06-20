@@ -237,10 +237,16 @@ app.get('/api/admin/stats', authenticateAdmin, async (req, res) => {
     // Active subscribers
     const activeRes = await db.query('SELECT COUNT(*) FROM subscribers WHERE active = true');
 
-    // Get KST start of 7 days ago
-    const dateInKST = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Seoul" }));
-    const startOfTodayKST = new Date(dateInKST);
-    startOfTodayKST.setHours(0, 0, 0, 0);
+    // Get KST start of today
+    const now = new Date();
+    const kstDateStr = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Asia/Seoul',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    }).format(now); // E.g. "2026-06-20"
+    
+    const startOfTodayKST = new Date(`${kstDateStr}T00:00:00+09:00`);
 
     const sevenDaysAgoKST = new Date(startOfTodayKST);
     sevenDaysAgoKST.setDate(sevenDaysAgoKST.getDate() - 6); // past 7 days includes today

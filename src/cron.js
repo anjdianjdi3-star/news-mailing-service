@@ -13,22 +13,32 @@ const { sendNewsletterEmail } = require('./email');
 async function runMailingJob(hostUrl) {
   console.log('--- Starting news mailer cron job execution ---');
   
-  // 1. Get current time in KST (UTC+9)
+  // 1. Get current time and date in KST (UTC+9)
   const now = new Date();
-  const dateInKST = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Seoul" }));
   
-  const hours = String(dateInKST.getHours()).padStart(2, '0');
-  const minutes = String(dateInKST.getMinutes()).padStart(2, '0');
-  const currentTimeKST = `${hours}:${minutes}`; // "HH:MM"
+  // Format current KST time as "HH:MM"
+  const currentTimeKST = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'Asia/Seoul',
+    hour12: false,
+    hour: '2-digit',
+    minute: '2-digit'
+  }).format(now);
   
-  const daysOfWeek = ['일', '화', '수', '목', '금', '토', '일']; // Note: getDay() returns 0 for Sunday
-  // Let's correct days mapping:
-  const daysOfWeekKST = ['일', '월', '화', '수', '목', '금', '토'];
-  const currentDayKST = daysOfWeekKST[dateInKST.getDay()]; // "월", "화" ...
+  // Format current KST weekday as "월", "화", ...
+  const currentDayKST = new Intl.DateTimeFormat('ko-KR', {
+    timeZone: 'Asia/Seoul',
+    weekday: 'short'
+  }).format(now);
   
-  // Calculate start of today in KST
-  const startOfTodayKST = new Date(dateInKST);
-  startOfTodayKST.setHours(0, 0, 0, 0);
+  // Calculate start of today (midnight) in KST
+  const kstDateStr = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Seoul',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  }).format(now); // E.g. "2026-06-20"
+  
+  const startOfTodayKST = new Date(`${kstDateStr}T00:00:00+09:00`);
 
   console.log(`Current KST Time: ${currentTimeKST} (${currentDayKST}요일)`);
   console.log(`Checking logs from: ${startOfTodayKST.toISOString()} (KST Start of Today)`);
@@ -36,7 +46,7 @@ async function runMailingJob(hostUrl) {
   // 2. Fetch subscribers who:
   // - Are active
   // - Scheduled for today
-  // - Scheduled time is <= current time
+  // - Scheduled time is <= current time (handles GitHub Actions execution delays or skips)
   // - Haven't received a successful mailing yet today
   let subscribers = [];
   try {
