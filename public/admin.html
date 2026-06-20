@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>뉴스레터 관리자 패널</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* Admin specific layout adjustments */
+    .dashboard-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+    .dashboard-header h1 {
+      margin-bottom: 0;
+      text-align: left;
+    }
+    .flex-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      gap: 10px;
+    }
+    .search-bar {
+      max-width: 300px;
+    }
+    .quota-warning-banner {
+      width: 100%;
+      margin-bottom: 25px;
+    }
+    .status-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: 6px;
+    }
+    .status-dot-success { background-color: var(--success); }
+    .status-dot-failure { background-color: var(--error); }
+  </style>
+</head>
+<body>
+
+  <!-- 1. Password Login Modal Overlay -->
+  <div id="login-overlay" class="modal-overlay">
+    <div class="modal-content">
+      <h2 style="text-align: center; margin-bottom: 20px;">🔒 관리자 로그인</h2>
+      <div id="login-error" class="alert alert-error" style="display: none;"></div>
+      <form id="login-form">
+        <div class="form-group">
+          <label for="admin-password">관리자 비밀번호</label>
+          <input type="password" id="admin-password" placeholder="비밀번호 입력" required>
+        </div>
+        <button type="submit" class="btn">로그인</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="container admin-container">
+    <!-- Header -->
+    <div class="dashboard-header">
+      <div>
+        <h1>🛡️ 뉴스레터 관리자 패널</h1>
+        <p style="color: var(--text-secondary); margin-top: 5px;">구독자, RSS 수집원 및 이메일 발송 로그를 관리합니다.</p>
+      </div>
+      <div>
+        <button id="logout-btn" class="btn btn-secondary" style="width: auto; padding: 8px 16px; font-size: 13px;">로그아웃</button>
+      </div>
+    </div>
+
+    <!-- Daily Limit Warning Alert Banner (Appears when quota limit is close) -->
+    <div id="quota-warning" class="alert alert-warning quota-warning-banner" style="display: none;">
+      <div>⚠️ <strong>주의:</strong> 일일 무료 이메일 발송량이 제한 수치(100건 무료 티어)의 80%를 초과했거나 거의 다 찼습니다! (현재 전송수: <span id="quota-warning-val">0</span>건)</div>
+    </div>
+
+    <!-- 2. Statistics Panel Grid -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <label>총 구독 신청자</label>
+        <div id="stat-total-subs" class="stat-val">0</div>
+      </div>
+      <div class="stat-card">
+        <label>활성 구독자</label>
+        <div id="stat-active-subs" class="stat-val">0</div>
+      </div>
+      <div class="stat-card">
+        <label>최근 7일 발송 성공</label>
+        <div id="stat-sent-week" class="stat-val">0</div>
+      </div>
+      <div class="stat-card">
+        <label>오늘 전송 (무료 quota 대비)</label>
+        <div id="stat-sent-today" class="stat-val">0 / 100</div>
+      </div>
+    </div>
+
+    <!-- 3. Navigation Tabs -->
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="tab-subscribers">👥 구독자 관리</button>
+      <button class="tab-btn" data-tab="tab-rss">📡 RSS 소스 관리</button>
+      <button class="tab-btn" data-tab="tab-logs">📜 발송 로그</button>
+      <button class="tab-btn" data-tab="tab-manual">⚡ 수동 테스트 발송</button>
+    </div>
+
+    <!-- 4. Tab 1: Subscribers list -->
+    <div id="tab-subscribers" class="tab-content active">
+      <div class="flex-row">
+        <h2>👥 구독자 목록</h2>
+        <input type="text" id="subscriber-search" class="search-bar" placeholder="이메일 또는 키워드 검색...">
+      </div>
+      <div class="table-wrapper">
+        <table id="subscribers-table">
+          <thead>
+            <tr>
+              <th>이메일 주소</th>
+              <th>수신 요일</th>
+              <th>수신 시간</th>
+              <th>키워드</th>
+              <th>상태</th>
+              <th>신청 일시</th>
+              <th>관리</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Dynamic rows -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Tab 2: RSS Feeds management -->
+    <div id="tab-rss" class="tab-content">
+      <div class="admin-sections">
+        <!-- RSS Source List -->
+        <div>
+          <h2>📡 등록된 RSS 수집원</h2>
+          <div class="table-wrapper">
+            <table id="rss-table">
+              <thead>
+                <tr>
+                  <th>카테고리</th>
+                  <th>피드 URL</th>
+                  <th>상태</th>
+                  <th>관리</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Dynamic rows -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Add RSS Source Form -->
+        <div>
+          <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--panel-border); border-radius: 16px; padding: 20px;">
+            <h2>➕ 새 RSS 등록</h2>
+            <form id="rss-form">
+              <div class="form-group">
+                <label for="rss-url">피드 URL</label>
+                <input type="text" id="rss-url" placeholder="https://example.com/rss" required>
+              </div>
+              <div class="form-group">
+                <label for="rss-category">카테고리명</label>
+                <input type="text" id="rss-category" placeholder="IT/과학, 사회 등" required>
+              </div>
+              <button type="submit" class="btn">RSS 수집원 추가</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab 3: Logs console -->
+    <div id="tab-logs" class="tab-content">
+      <h2>📜 최근 100건 이메일 발송 로그</h2>
+      <div class="table-wrapper">
+        <table id="logs-table">
+          <thead>
+            <tr>
+              <th>발송 시간 (KST)</th>
+              <th>대상 이메일</th>
+              <th>결과</th>
+              <th>기사 매칭수</th>
+              <th>오류/실패 사유</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Dynamic rows -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Tab 4: Manual sending test portal -->
+    <div id="tab-manual" class="tab-content">
+      <h2>⚡ 수동 테스트 뉴스레터 발송</h2>
+      <p style="color: var(--text-secondary); margin-bottom: 20px;">
+        등록된 RSS 피드에서 실시간 기사를 긁어와 구독자의 관심 키워드로 매칭한 후, Gemini 요약 및 Resend 메일링 과정을 즉시 실행해 봅니다.
+      </p>
+
+      <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--panel-border); border-radius: 16px; padding: 24px; max-width: 600px;">
+        <div class="form-group">
+          <label for="manual-subscriber-select">수신 테스트 대상</label>
+          <select id="manual-subscriber-select">
+            <option value="">전체 활성 구독자 대상 (일괄 수동 발송)</option>
+            <!-- Dynamic lists of active subscribers -->
+          </select>
+        </div>
+        <button id="trigger-manual-btn" class="btn">⚡ 즉시 발송 시도</button>
+
+        <div id="manual-sending-log" style="margin-top: 24px; display: none;">
+          <label>실행 상세 리포트</label>
+          <div id="manual-sending-report" style="background: #000; color: #34d399; font-family: monospace; font-size: 13px; padding: 15px; border-radius: 10px; min-height: 100px; white-space: pre-wrap; max-height: 300px; overflow-y: auto; border: 1px solid var(--panel-border);">
+            준비 중...
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>
+    <p>&copy; 2026 맞춤 뉴스 요약 서비스. All rights reserved.</p>
+    <p style="margin-top: 8px;"><a href="/">구독 페이지로 돌아가기</a></p>
+  </footer>
+
+  <script src="admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>키워드 맞춤 뉴스레터 구독</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="container">
+    <h1>📰 키워드 맞춤 뉴스레터</h1>
+    <p class="subtitle">지정한 요일과 시간에 관심 키워드가 포함된 뉴스를 이메일 요약으로 받아보세요.</p>
+
+    <!-- Notification Area -->
+    <div id="alert-box" style="display: none;"></div>
+
+    <form id="subscribe-form" novalidate>
+      
+      <!-- 1. Email Address -->
+      <div class="form-group">
+        <label for="email">이메일 주소</label>
+        <input type="email" id="email" placeholder="news@example.com" required>
+      </div>
+
+      <!-- 2. Select Days -->
+      <div class="form-group">
+        <label>수신 요일 (복수 선택 가능)</label>
+        <div class="days-grid">
+          <input type="checkbox" id="day-mon" class="day-checkbox" value="월">
+          <label for="day-mon" class="day-label">월</label>
+
+          <input type="checkbox" id="day-tue" class="day-checkbox" value="화">
+          <label for="day-tue" class="day-label">화</label>
+
+          <input type="checkbox" id="day-wed" class="day-checkbox" value="수">
+          <label for="day-wed" class="day-label">수</label>
+
+          <input type="checkbox" id="day-thu" class="day-checkbox" value="목">
+          <label for="day-thu" class="day-label">목</label>
+
+          <input type="checkbox" id="day-fri" class="day-checkbox" value="금">
+          <label for="day-fri" class="day-label">금</label>
+
+          <input type="checkbox" id="day-sat" class="day-checkbox" value="토">
+          <label for="day-sat" class="day-label">토</label>
+
+          <input type="checkbox" id="day-sun" class="day-checkbox" value="일">
+          <label for="day-sun" class="day-label">일</label>
+        </div>
+      </div>
+
+      <!-- 3. Select Time -->
+      <div class="form-group">
+        <label for="time">수신 시간</label>
+        <select id="time" required>
+          <!-- Will be dynamically populated with 30min intervals by app.js -->
+        </select>
+      </div>
+
+      <!-- 4. Keywords tag list -->
+      <div class="form-group">
+        <label>관심 키워드 (최대 5개)</label>
+        <div class="keywords-input-wrapper">
+          <div style="display: flex; gap: 8px;">
+            <input type="text" id="keyword-input" placeholder="예: 인공지능, 반도체, 주식 (엔터 또는 추가 버튼)">
+            <button type="button" id="add-keyword-btn" class="btn btn-secondary" style="width: auto; padding: 0 20px;">추가</button>
+          </div>
+          <div id="tags-container" class="tags-container" style="margin-top: 10px;"></div>
+        </div>
+      </div>
+
+      <!-- Submit Button -->
+      <button type="submit" class="btn" style="margin-top: 10px;">구독 신청하기</button>
+
+    </form>
+  </div>
+
+  <footer>
+    <p>&copy; 2026 맞춤 뉴스 요약 서비스. All rights reserved.</p>
+    <p style="margin-top: 8px;"><a href="/admin.html">관리자 페이지</a></p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

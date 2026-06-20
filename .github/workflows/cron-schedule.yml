@@ -1,0 +1,19 @@
+name: Custom News Mailer Cron Trigger
+
+on:
+  schedule:
+    # Run every 10 minutes
+    # Note: GitHub Actions schedule triggers can be delayed, but the backend handles this gracefully
+    - cron: '*/10 * * * *'
+  # Allow manual trigger from the GitHub Actions tab
+  workflow_dispatch:
+
+jobs:
+  trigger-cron:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger News Dispatch API
+        run: |
+          curl -X POST "https://${{ secrets.RENDER_APP_NAME }}.onrender.com/api/cron/send?secret=${{ secrets.CRON_SECRET }}" \
+            -H "Content-Type: application/json" \
+            -d '{}'

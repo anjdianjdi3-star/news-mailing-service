@@ -1,0 +1,34 @@
+{
+  "name": "keyword-news-mailer",
+  "version": "1.0.0",
+  "description": "Keyword-based custom newsletter mailer using Express, PostgreSQL, Gemini API, and Resend API",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js"
+  },
+  "keywords": [
+    "news",
+    "mailer",
+    "gemini",
+    "resend",
+    "postgres",
+    "express"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@google/genai": "*",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "pg": "^8.12.0",
+    "rss-parser": "^3.13.0",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.3"
+  }
+}
